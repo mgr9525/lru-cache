@@ -126,6 +126,17 @@ impl<K: Eq + Hash, V, S: BuildHasher> LruCache<K, V, S> {
         }
         old_val
     }
+    pub fn put(&mut self, k: K, v: V) -> Option<(Option<K>, V)> {
+        let old_val = self.map.insert(k, v);
+        if self.len() > self.capacity() {
+            return self.remove_lru().map(|(k, v)| (Some(k), v));
+        }
+        if let Some(old_val) = old_val {
+            Some((None, old_val))
+        } else {
+            None
+        }
+    }
 
     /// Returns a mutable reference to the value corresponding to the given key in the cache, if
     /// any.
